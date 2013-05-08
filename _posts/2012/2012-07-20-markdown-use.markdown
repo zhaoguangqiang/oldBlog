@@ -2,7 +2,7 @@
 layout: post
 title: markdown语法
 discription: 
-category: tool
+tag: tool
 
 ---
 

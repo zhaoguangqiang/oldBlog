@@ -2,7 +2,7 @@
 layout: post
 title: ubuntu12.04下安装win8后修复引导
 discription: 
-category: system
+tag: ubuntu 
 
 ---
 

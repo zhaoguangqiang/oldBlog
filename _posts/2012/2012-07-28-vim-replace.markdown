@@ -3,7 +3,7 @@ title: vim字符串批量替换
 excerpt:  
 location: 
 layout: post
-category: tool
+tag: vim 
 
 ---
 
