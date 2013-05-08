@@ -1,0 +1,6 @@
+markdown: rdiscount
+permalink: /:year/:month/:title/
+url: 
+author: 彧宇痕羿 
+pygments: true
+paginate: 16
