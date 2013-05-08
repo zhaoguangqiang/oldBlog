@@ -2,7 +2,7 @@
 layout: post
 title: 
 discription: 
-category: arm
+tags: fl2440
 ---
 
   最近拿到一块fl2440的开发板，准备着手嵌入式，我是在linux（ubuntu12.04）下调试的，由于教程中的linux下调试开发板的资料较少，而遇到的问题较多，所以我边调试边将问题的解决方法整合一下，以下是本小菜鸟遇到教程中没有提及而又出现的一些problems，
