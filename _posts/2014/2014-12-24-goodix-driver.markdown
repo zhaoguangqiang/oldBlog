@@ -28,13 +28,13 @@ tags: linux-driver
  二、硬件略述（引用网上的概述）
 ======
 
-  ###1.电容屏模组组成
+  ### 1.电容屏模组组成
 
   触摸屏：也就是我们手触摸操作的透明部分；
 
   触摸IC：当电容屏触摸到时，要解析到触点的位置坐标，就是通过这颗芯片去计算处理的。
 
-  ###2.电容屏工作原理：通过上报x，y轴坐标值去实现相应操作
+  ### 2.电容屏工作原理：通过上报x，y轴坐标值去实现相应操作
 
   ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/img/1343834433_2370.jpg)
 
@@ -46,7 +46,7 @@ tags: linux-driver
     
   ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/img/4168.jpg)
   
-  ###3.电容式触摸屏的类型主要有两种：
+  ### 3.电容式触摸屏的类型主要有两种：
 
   （1）、表面电容式： 表面电容式利用位于四个角落的传感器以及均匀分布整个表面的薄膜，有一个普通的ITO层和一个金属边框,当一根手 指触摸屏幕时,从板面上放出电荷,感应在触 屏 的四角完成,不需要复杂的ITO图案；
 
