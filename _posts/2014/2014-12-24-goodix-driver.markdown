@@ -53,7 +53,34 @@ tags: linux-driver
   （2）、投射式电容： 采用一个或多个精心设计,被蚀烛的ITO,这些 ITO层通过蛀蚀形成多个水平和垂直电极，采用成行/列交错同时带有传感功能的独立芯片。现在平板电脑、手机、车载等多用投射式电容，所以我们后面分析表明投射式电容的构成。
 
   ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/img/7640.jpg)
-  
+
+  3、电容触屏的结构分类：
+
+  （1）、单层ITO 
+
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/img/ITO1.jpg)
+
+    优点:成本 低,透过率 高,
+
+    缺点: 抗干扰能力 差
+
+  （2）、单面双层ITO 
+
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/img/ITO2.jpg)
+
+    优点:性能 好,良率高
+
+    缺点:成本 较高
+
+  （3）、双面单层ITO 
+
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/img/ITO3.jpg)
+
+    优点:性能好,抗静电能力强
+
+    缺点:抗干扰能力差
+
+
 
 
     
