@@ -2,17 +2,22 @@
 layout: post
 title: 
 discription: 
-tags: fl2440
+tags: linux-driver
 ---
+  注：该文章参考<http://blog.csdn.net/xubin341719/article/details/7820492>
+  前几天学习了I2C子系统，今天就拿触摸屏驱动练练手了。
 
-  最近拿到一块fl2440的开发板，准备着手嵌入式，我是在linux（ubuntu12.04）下调试的，由于教程中的linux下调试开发板的资料较少，而遇到的问题较多，所以我边调试边将问题的解决方法整合一下，以下是本小菜鸟遇到教程中没有提及而又出现的一些problems，
-
- 笔记本配置minicom
+ 一、对电容屏实现原理的分析
 ======
 
-  在我拿到开发板时，首先想到的是要在我的台式机与笔记本上都能够调试fl2440，而在linux中，我安装的是minicom作为二者通讯工具，通过教程我轻松的将串口在台式机中调试正确，而笔记本上却没有调试成功，后来才发现tty接口没有配置正确：
-       台式机需要设置ttyS0
-       笔记本需要设置ttyUSB0
+  首先我们拿到了这个电容屏后，先去看的是该芯片说明手册，最多的是可支持10点的电容屏触摸芯片，然后由概述及特点中找寻我需要的信息     
+   *它使用的是I2C的通讯接口*
+   *从设备工作模式*
+  工作模式:
+    Normal mode 
+    Green mode
+    Sleep mode
+    <img src = "./work_mode.png">
 
  arm-linux-gcc4.3.2编译linux2.6.28内核
 ======
