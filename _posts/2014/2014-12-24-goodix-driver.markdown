@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 
+title: goodix guitar 电容屏驱动学习
 discription: 
 tags: linux-driver
 ---
