@@ -23,14 +23,20 @@ tags: linux-driver
     Green mode      48ms  
     Sleep mode      
 
-    ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/work_mode.png)
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/work_mode.png)
 
  二、硬件略述（引用网上的概述）
 ======
 
-  电容屏工作原理：通过上报x，y轴坐标值去实现相应操作
+  1、电容屏模组组成
 
-    ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/1343834433_2370.jpg)
+  触摸屏：也就是我们手触摸操作的透明部分；
+
+  触摸IC：当电容屏触摸到时，要解析到触点的位置坐标，就是通过这颗芯片去计算处理的。
+
+  2、电容屏工作原理：通过上报x，y轴坐标值去实现相应操作
+
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/1343834433_2370.jpg)
 
   我们可以对比电容屏与电阻屏来加深对其工作原理的认识
 
@@ -38,6 +44,23 @@ tags: linux-driver
 
   电容屏:当手指触摸在金属层上时，触点的电容就会发生变化，使得与之相连的振荡器频率发生变化，通过测量频率变化可以确定触摸位置获得信息.
     
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/4168.jpg)
+  
+
+
+    
 
   
+
+
+
+
+
+
+
+
+
+
+
+
 
