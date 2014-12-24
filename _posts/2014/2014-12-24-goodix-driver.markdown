@@ -45,6 +45,14 @@ tags: linux-driver
   电容屏:当手指触摸在金属层上时，触点的电容就会发生变化，使得与之相连的振荡器频率发生变化，通过测量频率变化可以确定触摸位置获得信息.
     
   ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/4168.jpg)
+
+  3、电容式触摸屏的类型主要有两种：
+
+  （1）、表面电容式： 表面电容式利用位于四个角落的传感器以及均匀分布整个表面的薄膜，有一个普通的ITO层和一个金属边框,当一根手 指触摸屏幕时,从板面上放出电荷,感应在触 屏 的四角完成,不需要复杂的ITO图案；
+
+  （2）、投射式电容： 采用一个或多个精心设计,被蚀烛的ITO,这些 ITO层通过蛀蚀形成多个水平和垂直电极，采用成行/列交错同时带有传感功能的独立芯片。现在平板电脑、手机、车载等多用投射式电容，所以我们后面分析表明投射式电容的构成。
+
+  ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/7640.jpg)
   
 
 
