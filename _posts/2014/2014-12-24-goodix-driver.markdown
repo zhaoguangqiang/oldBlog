@@ -17,7 +17,7 @@ tags: linux-driver
     Normal mode 
     Green mode
     Sleep mode
-    <img src = "./work_mode.png">
+    ![Alt text](./work_mode.png")
 
  arm-linux-gcc4.3.2编译linux2.6.28内核
 ======
