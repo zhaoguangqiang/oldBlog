@@ -17,11 +17,10 @@ tags: linux-driver
     Normal mode 
     Green mode
     Sleep mode
-    ![Alt text](./work_mode.png")
+    ![Alt text](./work_mode.png)
 
  arm-linux-gcc4.3.2编译linux2.6.28内核
 ======
 
-  一段检查调试过后，感觉产品没什么问题后，我就开始编译内核了，首先安装交叉编译的工具链，曾经也制作过工具链，但是巨耗时间，而且废了我好几个ubuntu系统，所以用现成的工具链，安装很轻松，但是
 
 
