@@ -11,16 +11,33 @@ tags: linux-driver
 ======
 
   首先我们拿到了这个电容屏后，先去看的是该芯片说明手册，最多的是可支持10点的电容屏触摸芯片，然后由概述及特点中找寻我需要的信息     
-   *它使用的是I2C的通讯接口*
-   *从设备工作模式*
-  工作模式:
-    Normal mode 
-    Green mode
-    Sleep mode
-    ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/work_mode.png)<a href="" target="_blank"><img src="/home/zhgq/zhaoguangqiang.github.com/_posts/2014/work_mode.png"/></a>
+   **它使用的是I2C的通讯接口**
 
- arm-linux-gcc4.3.2编译linux2.6.28内核
+  可以根据说明文档来模拟时序或者直接用内核中的结构体来填充i2c_msg结构体，之后用i2c_transfer函数将信息去写入i2c_adapter，让adapter处理发送或接受过程
+
+   **从设备工作模式**
+
+  工作模式:       扫描周期   
+
+    Normal mode     16ms  
+    Green mode      48ms  
+    Sleep mode      
+
+    ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/work_mode.png)
+
+ 二、硬件略述（引用网上的概述）
 ======
 
+  电容屏工作原理：通过上报x，y轴坐标值去实现相应操作
 
+    ![image](https://raw.githubusercontent.com/zhaoguangqiang/zhaoguangqiang.github.com/master/_posts/2014/1343834433_2370.jpg)
+
+  我们可以对比电容屏与电阻屏来加深对其工作原理的认识
+
+  电阻屏：当手指按在触摸屏上时，该处两层导电层接触，电阻发生变化，在X和Y两个方向上产生信号，然后送触摸屏控制器。
+
+  电容屏:当手指触摸在金属层上时，触点的电容就会发生变化，使得与之相连的振荡器频率发生变化，通过测量频率变化可以确定触摸位置获得信息.
+    
+
+  
 
