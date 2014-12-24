@@ -17,7 +17,7 @@ tags: linux-driver
     Normal mode 
     Green mode
     Sleep mode
-    ![Alt text](./work_mode.png)<a href="" target="_blank"><img src="./work_mode.png"/></a>
+    ![Alt text](./work_mode.png)<a href="" target="_blank"><img src="/home/zhgq/zhaoguangqiang.github.com/_posts/2014/work_mode.png"/></a>
 
  arm-linux-gcc4.3.2编译linux2.6.28内核
 ======
