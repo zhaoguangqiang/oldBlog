@@ -29,54 +29,69 @@ tags: vim
 
 二、安装ctags
 ======
-  通常可以从http://ctags.sourceforge.net下载
-  ``tar zxvf ctags-x.x.tar.gz``
-  ``cd ctags-x.x``
-  ``make``
-  ``sudo make install``
-  
-  或者也可以
-  ``sudo apt-get install ctags``
+  通常可以从http://ctags.sourceforge.net下载  
 
-  进入你的想要生成tags的目录，编写该命令去生成tags
-  ``ctags -R``
+  ``tar zxvf ctags-x.x.tar.gz``  
+  ``cd ctags-x.x``  
+  ``make``  
+  ``sudo make install``  
+  
+  或者也可以  
+
+  ``sudo apt-get install ctags``  
+
+  进入你的想要生成tags的目录，编写该命令去生成tags  
+
+  ``ctags -R``  
   或
-  ``make tags``
-三、安装Taglist（注：该步操作是在你用户目录下操作，例如：/home/zhgq/）-->功能：浏览源码
+  ``make tags`` 
+
+三、安装Taglist（注：该步操作是在你用户目录下操作，例如：/home/zhgq/）-->功能：浏览源码  
 ======
-  继续下载解压
-  ``http://www.csdn.net/tag/taglist/download``
-  ``unzip taglist_45.zip``
-  进入解压目录会有doc/与plugin/两目录
-  ``cp doc/* .vim/doc`` 这是我用户下的.vim目录
-  ``cp plugin/* .vim/plugin`` 这是我用户下的.vim目录
-  在你用户目录下的.vimrc文档中添加以下两语句
-  ``let Tlist_Use_Right_Window=1`` 设置窗口左右位置
-  ``let Tlist_File_Fold_Auto_Close=1`` 设置窗口内容是否折叠
+
+  继续下载解压  
+
+  ``http://www.csdn.net/tag/taglist/download``  
+  ``unzip taglist_45.zip``  
+
+  进入解压目录会有doc/与plugin/两目录  
+
+  ``cp doc/* .vim/doc`` 这是我用户下的.vim目录  
+  ``cp plugin/* .vim/plugin`` 这是我用户下的.vim目录  
+
+  在你用户目录下的.vimrc文档中添加以下两语句  
+
+  ``let Tlist_Use_Right_Window=1`` 设置窗口左右位置  
+  ``let Tlist_File_Fold_Auto_Close=1`` 设置窗口内容是否折叠  
+
   四、略过前两步的童鞋，到了这里bufxplorer安装--缓冲区浏览列表
 ======
-  继续下载解压
-  ``http://www.vim.org/scripts/download_script.php?src_id=22601``
-  安装操作同上
-  在你用户目录下的.vimrc文档中添加以下两语句
+  继续下载解压  
 
-  let g:bufExplorerDefaultHelp = 0
-  let g:bufExplorerSortBy = ‘mru’
+  ``http://www.vim.org/scripts/download_script.php?src_id=22601``  
 
-  nmap bf :BufExplorer<cr>
-  nmap bp :bp<cr>          " 前一个文件
-  nmap bn :bn<cr>          " 后一个文件
+  安装操作同上  
+  在你用户目录下的.vimrc文档中添加以下两语句  
 
-  在vim中输入bf命令可浏览曾经浏览过的文件，有点history的意思
+  let g:bufExplorerDefaultHelp = 0  
+  let g:bufExplorerSortBy = ‘mru’  
+
+  nmap bf :BufExplorer<cr>  
+  nmap bp :bp<cr>          " 前一个文件  
+  nmap bn :bn<cr>          " 后一个文件  
+
+  在vim中输入bf命令可浏览曾经浏览过的文件，有点history的意思  
 
   五、winmanage安装--文件浏览和窗口管理
 ======
   继续下载解压
-  ``http://www.vim.org/scripts/download_script.php?src_id=18243``
-  安装操作同上
-  在你用户目录下的.vimrc文档中添加以下两语句
-  ``let g:winManagerWindowLayout='FileExplorer|TagList'``
-  ``nmap wm :WMToggle<cr>``
+
+  ``http://www.vim.org/scripts/download_script.php?src_id=18243``  
+  安装操作同上  
+  在你用户目录下的.vimrc文档中添加以下两语句  
+  ``let g:winManagerWindowLayout='FileExplorer|TagList'``  
+  ``nmap wm :WMToggle<cr>``  
+  " bufexplorer co                  
 
   六、代码折叠与快速切换头文件与源文件明天继续。。。。累了
 
