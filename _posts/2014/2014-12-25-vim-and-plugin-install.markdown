@@ -26,7 +26,6 @@ tags: vim
   ``chmod +x copy_con.sh``
   否则无法执行
 
-
 二、安装ctags
 ======
   通常可以从http://ctags.sourceforge.net下载  
@@ -42,16 +41,15 @@ tags: vim
 
   进入你的想要生成tags的目录，编写该命令去生成tags  
 
-  ``ctags -R``  
-  或
-  ``make tags`` 
+  ``ctags -R``  或 ``make tags`` 
 
-三、安装Taglist（注：该步操作是在你用户目录下操作，例如：/home/zhgq/）-->功能：浏览源码  
+三、安装Taglist-->功能：浏览源码  
 ======
+###（注：该步操作是在你用户目录下操作，例如：/home/zhgq/）
 
   继续下载解压  
 
-  ``http://www.csdn.net/tag/taglist/download``  
+  <http://www.csdn.net/tag/taglist/download>  
   ``unzip taglist_45.zip``  
 
   进入解压目录会有doc/与plugin/两目录  
@@ -68,13 +66,13 @@ tags: vim
 ======
   继续下载解压  
 
-  ``http://www.vim.org/scripts/download_script.php?src_id=22601``  
+  <http://www.vim.org/scripts/download_script.php?src_id=22601>
 
   安装操作同上  
   在你用户目录下的.vimrc文档中添加以下两语句  
 
   let g:bufExplorerDefaultHelp = 0  
-  let g:bufExplorerSortBy = ‘mru’  
+  let g:bufExplorerSortBy = 'mru'  
 
   nmap bf :BufExplorer<cr>  
   nmap bp :bp<cr>          " 前一个文件  
@@ -91,7 +89,6 @@ tags: vim
   在你用户目录下的.vimrc文档中添加以下两语句  
   ``let g:winManagerWindowLayout='FileExplorer|TagList'``  
   ``nmap wm :WMToggle<cr>``  
-  " bufexplorer co                  
 
   六、代码折叠与快速切换头文件与源文件明天继续。。。。累了
 
