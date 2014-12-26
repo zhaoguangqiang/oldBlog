@@ -97,9 +97,10 @@ tags: vim
   原因分析：NFS 的默认传输协议是 UDP，而PC机与嵌入式系统通过UPD交互时就会出现严重的网卡丢包现象  
   所以我们可以选择用tcp协议模式去挂载  
   mount -o tcp nolock 192.168.1.23:/home/share /mnt/hosts  
-  **好吧，我承认这个方法没有测试成功，但是有下个方法就足够了**  
+  **好吧，我承认这个方法没有测试成功，但是有下个方法就足够了,不过既然写了就把它写好吧**  
+  **tcp协议改进：mount -t nfs 192.168.10.1:/work/nfs /mnt/nfs -o nolock,proto=tcp,nfsvers=3 基于tcp协议**
   或  
-  mount -t nfs -o intr,nolock,rsize=1024,wsize=1024 192.168.1.101:/home/share /mnt/hosts  
+  mount -t nfs -o intr,nolock,rsize=1024,wsize=1024 192.168.1.101:/home/share /mnt/hosts  基于udp协议
 
   至此，arm与pc的通信环境基本搭建完成  
 
