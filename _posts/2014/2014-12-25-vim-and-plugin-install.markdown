@@ -65,7 +65,6 @@ tags: vim
   四、略过前两步的童鞋，到了这里bufxplorer安装--缓冲区浏览列表
 ======
   继续下载解压  
-
   <http://www.vim.org/scripts/download_script.php?src_id=22601>
 
   安装操作同上  
@@ -82,13 +81,14 @@ tags: vim
 
   五、winmanage安装--文件浏览和窗口管理
 ======
-  继续下载解压
-
+####安装：
+  继续下载解压  
   ``http://www.vim.org/scripts/download_script.php?src_id=18243``  
   安装操作同上  
   在你用户目录下的.vimrc文档中添加以下两语句  
-  ``let g:winManagerWindowLayout='FileExplorer|TagList'``  
+  ``let g:winManagerWindowLayout='BufExplorer|FileExplorer|TagList'``  
   ``nmap wm :WMToggle<cr>``  
+  wm快速启动fileexplore与taglist
 
   六、代码折叠与快速切换头文件与源文件
 ======
@@ -103,6 +103,22 @@ tags: vim
  > diff            对没有更改的文本进行折叠         
  > marker          对文中的标志折叠  
   注意，每一种折叠方式不兼容，如不能既用expr又用marker方式
+####indent下折叠使用：
+ > zfap -> 按照段落折叠 (fold by paragraph)
+ > zo -> 打开一个折叠 (open fold)
+ > zc -> 关闭一个折叠 (close fold)
+ > zf -> 创建折叠 (create fold) 这个可以用v视觉模式，可以直接给行数等等
+ > zr -> 打开一定数量的折叠，例如3rz (reduce the folding by number like 3zr)
+ > zm -> 折叠一定数量（之前你定义好的折叠） (fold by number)
+ > zR -> 打开所有的折叠 (open all fold)
+ > zM -> 关闭所有的摺叠 (close all fold)
+ > zn -> 关闭折叠功能 (disable fold)
+ > zN -> 开启折叠功能 (enable fold)
+ > zO -> 将光标下所有折叠打开 (open all folds at the cursor line)
+ > zC -> 将光标下所有折叠关闭 (close all fold at cursor line)
+ > zd -> 将光标下的折叠删除，这里不是删除内容，只是删除折叠标记 (delete fold at cursor line)
+ > zD -> 将光标下所有折叠删除 (delete all folds at the cursor line)
+
 
  七、快速切换头文件与源文件
 ======
@@ -110,14 +126,14 @@ tags: vim
   下载a.vim,放至.vim/plugin/文件夹  
 
 ####使用： 
-#####> 头/源文件切换命令:
+##### 头/源文件切换命令:
  > :A 头文件／源文件切换  
  > :AS 分割窗后并切换头/源文件(切割为上下两个窗口)  
  > :AV 垂直切割窗口后切换头/源文件(切割为左右两个窗口)  
  > :AT 新建Vim标签式窗口后切换  
  > :AN 在多个匹配文件间循环切换  
 
-#####> 将光标所在处单词作为文件名打开
+##### 将光标所在处单词作为文件名打开
  > :IH 切换至光标所在文件  
  > :IHS 分割窗口后切换至光标所在文件(指将光标所在处单词作为文件名打开)  
  > :IHV 垂直分割窗口后切换  
