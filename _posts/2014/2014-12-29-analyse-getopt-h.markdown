@@ -27,17 +27,17 @@ tags: linux c
 =====
   比起getopt，getopt_long多了const struct option \*longopts, int \*longindex两参数，第一个是指向
   option结构体的组成的数组，第二个参数是记录longopts当前所对应第几个参数的下标值
-> struct option
-> {
->  const char \*name;
->  int has_arg;
->  int \*flag; 通常为NULL，它会把val的值返回
->  int val;
-> };
+> struct option  
+> {  
+>  const char \*name;  
+>  int has_arg;  
+>  int \*flag; 通常为NULL，它会把val的值返回  
+>  int val;  
+> };  
 ####has_arg:
-  no_argument (即 0) 表明这个长参数不带参数（即不带数值，如：--name）
-  required_argument (即 1) 表明这个长参数必须带参数（即必须带数值，如：--name Bob）
-  optional_argument（即2）表明这个长参数后面带的参数是可选的，
+  no_argument (即 0) 表明这个长参数不带参数（即不带数值，如：--name）  
+  required_argument (即 1) 表明这个长参数必须带参数（即必须带数值，如：--name Bob） 
+  optional_argument（即2）表明这个长参数后面带的参数是可选的  
 
  三、getopt_long_only
 =====
