@@ -18,7 +18,7 @@ tags: linux c
   ``extern int opterr;``0时，错误不返回信息  
   ``extern int optopt;``  
   
-  getopt的参数也只有三个，前两个从main中得到，最后一个是字符串地址，而每个字符都是一个可选参数，后面  
+  getopt的参数也只有三个，前两个从main中得到，最后一个是字符串地址，而每个字符都是一个可选参数，后面
   跟：表示该参数可以另外加参数  
   
   在<http://blog.csdn.net/cashey1991/article/details/7942809>该博客有非常好的例子可参考  
