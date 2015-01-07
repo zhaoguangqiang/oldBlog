@@ -11,17 +11,17 @@ tags: linux c
   
  一、getopt
 ======
-  实际上，我用到了getopt_long_only()该函数，但是相对来说getopt()该函数参数较少，易于理解
-  在getopt.h该文件中首先映入眼帘的应该是以下几个变量的声明
-  ``extern char *optarg;``存放下一个参数地址
-  ``extern int optind;``下一个处理到的参数的下标值
-  ``extern int opterr;``0时，错误不返回信息
-  ``extern int optopt;``
-
-  getopt的参数也只有三个，前两个从main中得到，最后一个是字符串地址，而每个字符都是一个可选参数，后面
-  跟：表示该参数可以另外加参数
-
-  在<http://blog.csdn.net/cashey1991/article/details/7942809>该博客有非常好的例子可参考
+  实际上，我用到了getopt_long_only()该函数，但是相对来说getopt()该函数参数较少，易于理解  
+  在getopt.h该文件中首先映入眼帘的应该是以下几个变量的声明  
+  ``extern char *optarg;``存放下一个参数地址  
+  ``extern int optind;``下一个处理到的参数的下标值  
+  ``extern int opterr;``0时，错误不返回信息  
+  ``extern int optopt;``  
+  
+  getopt的参数也只有三个，前两个从main中得到，最后一个是字符串地址，而每个字符都是一个可选参数，后面  
+  跟：表示该参数可以另外加参数  
+  
+  在<http://blog.csdn.net/cashey1991/article/details/7942809>该博客有非常好的例子可参考  
 
  二、getopt_long
 =====
