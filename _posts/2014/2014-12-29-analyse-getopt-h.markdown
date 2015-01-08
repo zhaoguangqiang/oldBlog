@@ -2,7 +2,7 @@
 layout: post
 title: getopt.h浅析
 discription: 
-tags: linux c
+tags: c
 ---
   今天，移植了好长时间的mjpg stream这款开源软件，临下班看了一下mjpg的源码，果然自己就是菜鸟一个，getopt_long_only就卡在那儿了，无奈查阅
   该函数头文件getopt.h，但是小生才疏学浅，又google了一下，最后两样搭配在一起才算搞懂了

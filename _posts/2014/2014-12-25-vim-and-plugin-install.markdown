@@ -139,8 +139,11 @@ tags: vim
  > :IHV 垂直分割窗口后切换  
  > :IHT 新建标签式窗口后切换  
  > :IHN 在多个匹配文件间循环切换  
-  
 
+ 八、最后做一下推广，附上我的vim配置
+=====
+  链接地址<https://github.com/zhaoguangqiang/zhaoguangqiang.github.com/blob/master/_posts/src_file/vim.tar.gz?raw=true>  
+  ok,over!  
 
 
 
