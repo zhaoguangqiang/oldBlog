@@ -1,0 +1,21 @@
+---
+layout: post
+title: 利用modbus协议实现主从设备通信（三）————编写程序所遇到的问题 
+discription: 
+tags: linux
+---
+  在调试程序的过程中，真的是遇到了不少的问题，一个个的来吧。
+
+一、open，select参数配置问题
+=====
+  
+###open
+  ``open("/dev/ttySAC3",O_RDWR | O_NOCTTY | O_NDELAY);``  
+  在open函数中，我曾使用了O_RDWR ,O_NOCTTY ,O_NDELAY这三个参数
+  O_RDWR:可读可写，我想只要想使用串口通信的人就应该用吧  
+  O_NOCTTY:通知Linux系统，这个程序不会成为对应这个端口的控制终端,保证任何一个输入信号都不会影响该程序  
+  O_NDELAY:通知linux系统不关心DCD信号线所处的状态(端口的另一端是否激活或者停止),当时接收端没有调好，由于不阻塞，一直发送但不接收，后来就不要该参数了
+
+###select
+  
+  
