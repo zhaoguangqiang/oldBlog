@@ -6,7 +6,7 @@ tags: linux
 ---
   在调试程序的过程中，真的是遇到了不少的问题，一个个的来吧。
 
-一、open，select参数配置问题
+ 一、open，select参数配置问题
 =====
   
 ###open
@@ -17,5 +17,165 @@ tags: linux
   O_NDELAY:通知linux系统不关心DCD信号线所处的状态(端口的另一端是否激活或者停止),当时接收端没有调好，由于不阻塞，一直发送但不接收，后来就不要该参数了
 
 ###select
+
+  ``fd_set fs_read;``
+  ``struct timeval time;``
+  ``FD_ZERO(&fs_read);``
+  ``FD_SET(fd,&fs_read);``
+  ``time.tv_sec = 2;``
+  ``time.tv_usec = 0;``
+  ``select(1+fd,&fs_read,NULL,NULL,&time)``
+
+  先设置一个fd_set类型的文件描述符集合，定义一个timeval类型的time结构体  
+  文件描述符集合是用来存放文件描述符的  
+  timeval就做个定时功能  
+>  struct timeval {  
+>	  time_t       tv_sec;     /* seconds */  
+>	  suseconds_t   tv_usec; /* microseconds */  
+>  };  
   
+####函数定义:  
+   ``int select(int n,fd_set * readfds,fd_set * writefds,fd_set * exceptfds,struct timeval * timeout);``  
+####参数配置：
+   如果监测多个文件描述符，则应该取最大文件描述符+1，作为select的第一个参数  
+   第二，三，四个参数取文件描述符集合的地址，有读，写，例外三种状态，因为我们用select轮询去监测read，所以只用
+   readfds读文件描述符集合就ok，其他两个为NULL。
+   最后一个参数就是time了  
+
+####返回值：
+   >0表示返回fd的个数，0表示timeout，-1表示error  
+
+  经常与select一起用的函数：  
+  FD_CLR(inr fd,fd_set* set)；用来清除描述词组set中相关fd 的位   
+  FD_ISSET(int fd,fd_set *set)；用来测试描述词组set中相关fd 的位是否为真  
+  FD_SET（int fd,fd_set*set）；用来设置描述词组set中相关fd的位  
+  FD_ZERO（fd_set *set）； 用来清除描述词组set的全部位  
+
+ 实际上弄懂select，之后read就一句话就可以读到串口数据了。  
+
+ 要想循环用select以及它的定时等待，必须每次试用前都要配置tv_sec,tv_usec
+
+###read
+ 当时出错，返回-1，perror了以下，打印resource temporarily unavailable这个错误,好像是open设备的问题，具体的记不清了,
+ 好像是open中O_RDONLY的问题。。。
+
+ 二、termios结构体配置问题（百度百科中总结的很全，）
+=====
+  百度百科里面写的太好了，那就先追根溯源一下吧  
+
+  termios的实现中，有大量的参数设置，还有伪终端的说法。原因就在于当初UNIX发明时，（上世纪七十~八十年代），在美国，
+  西欧大学里面用的都是大型机加客户终端，学生们用的是串口方式与大型机进行交流，通讯。所以，当时很多软件的设计都是
+  针对这种情况而开发的。包括termios，tty，X window等等。因为要在串口上传输，所以不得不定义很多按键的组合符号和很多
+  传输模式。
+
+  百科中提到，可以使用以下函数去获取和设置终端属性，行控制，获取和设置波特率
+
+> `` int tcgetattr(int fd, struct termios *termios_p); //用于获取与终端相关的参数``
+> `` int tcsetattr(int fd, int optional_actions, struct termios *termios_p); //用于设置终端参数``
+> `` int tcsendbreak(int fd, int duration);``
+> `` int tcdrain(int fd); //等待直到所有写入 fd 引用的对象的输出都被传输``
+> `` int tcflush(int fd, int queue_selector); //刷清(扔掉)输入缓存``
+> `` int tcflow(int fd, int action); //挂起传输或接受``
+> `` int cfmakeraw(struct termios *termios_p);``
+> `` speed_t cfgetispeed(struct termios *termios_p); //得到输入速度``
+> `` speed_t cfgetospeed(struct termios *termios_p); //得到输出速度``
+> `` int cfsetispeed(struct termios *termios_p, speed_t speed); //设置输入速度``
+> `` int cfsetospeed(struct termios *termios_p, speed_t speed) //设置输出速度``
+
+  实际上我先打开串口，用tcgetattr去保存当前终端参数至oldtio，之后在setTermios中去配置新的终端参数至newtio，用tcflush
+  清空输入端缓存，并将新的带终端参数的newtio这个结构体传给终端设备文件进行配置，当程序结束后，用tcsetattr函数恢复为原
+  状态  
+
+> ``tcgetattr(rs485_devinfo.rs485_devfd, &oldtio); /* save current serial port settings */``
+
+> ``setTermios(&newtio,B9600,8,1,'N');``
+> ``tcflush(rs485_devinfo.rs485_devfd, TCIFLUSH);``
+> ``tcsetattr(rs485_devinfo.rs485_devfd, TCSANOW, &newtio);``
+ 
+> ``while(1){``
+> ``	read_modbus_slave_dev(&rs485_devinfo);``
+> ``}``
+
+> ``tcsetattr(rs485_devinfo.rs485_devfd, TCSANOW, &oldtio);``
+ 
+  从bits/termios.h中拿出来了struct termios
+> `` struct termios``
+> ``   {``
+> ``     tcflag_t c_iflag;		/* input mode flags */``
+> ``     tcflag_t c_oflag;		/* output mode flags */``
+> ``     tcflag_t c_cflag;		/* control mode flags */``
+> ``     tcflag_t c_lflag;		/* local mode flags */``
+> ``     cc_t c_line;			/* line discipline */``
+> ``     cc_t c_cc[NCCS];		/* control characters */``
+> ``     speed_t c_ispeed;		/* input speed */``
+> ``     speed_t c_ospeed;		/* output speed */``
+> `` #define _HAVE_STRUCT_TERMIOS_C_ISPEED 1``
+> `` #define _HAVE_STRUCT_TERMIOS_C_OSPEED 1``
+> ``   };``
   
+  本来就没几个参数，重点是c_cflag,在termios.h中，宏定义了tcflag_t,事实上它就是一个unsigned int型数据  
+
+  ``pNewtio->c_cflag = uBaudRate| CREAD | CLOCAL;``  
+ 
+  CREAD 打开接受者,否则有可能接收不到数据  
+  CLOCAL 忽略 modem 控制线。  
+  uBaudRate 我传参传进来的，直接写到c_cflag中了，没用cfsetispeed() cfsetospeed(),这两个函数  
+
+####设置数据位，需使用掩码设置  
+> ``switch(databits){``  
+> ``	case 7:``  
+> ``		pNewtio->c_cflag |= CS7;``  
+> ``		break;``  
+> ``	case 8:``  
+> ``		pNewtio->c_cflag |= CS8;``  
+> ``		break;``  
+> ``	default:``  
+> ``		return -1;``  
+> ``}``  
+
+####设置奇偶校验或不设置
+> ``switch(parity){``  
+> ``	case 'n':``  
+> ``	case 'N':``  
+> ``		pNewtio->c_cflag &= ~PARENB; /* Clear parity enable */   ``  
+> ``		pNewtio->c_iflag &= ~INPCK; /* Enable parity checking */   ``  
+> ``		break;``  
+> ``	case 'o':``  
+> ``	case 'O':``  
+> ``		pNewtio->c_cflag |= (PARODD | PARENB); /* 设置为奇效验 */   ``  
+> ``		pNewtio->c_iflag |= INPCK; /* Disnable parity checking */   ``  
+> ``		break;``  
+> ``	case 'e':``  
+> ``	case 'E':``  
+> ``		pNewtio->c_cflag |= PARENB; /* Enable parity */   ``  
+> ``		pNewtio->c_cflag &= ~PARODD; /* 转换为偶效验 */   ``  
+> ``		pNewtio->c_iflag |= INPCK; /* Disnable parity checking */   ``  
+> ``		break;``  
+> ``	case 'S':``  
+> ``	case 's': /* as no parity */   ``  
+> ``		pNewtio->c_cflag &= ~PARENB;``  
+> ``		pNewtio->c_cflag &= ~CSTOPB;``  
+> ``		break ;``  
+> ``	default:``  
+> ``		return -1;``  
+> ``}``  
+
+####选择停止位  
+> ``   switch(stopbits){``  
+> ``	case 1:``  
+> ``		pNewtio->c_cflag &= ~CSTOPB;``  
+> ``		break;``  
+> ``	case 2:``  
+> ``		pNewtio->c_cflag |= CSTOPB;``  
+> ``		break;``  
+> ``	default:``  
+> ``		return -1;``  
+> ``}``  
+
+####设置最少字符和等待时间
+> ``pNewtio->c_cc[VTIME] = 150; // 15 seconds``  
+> ``pNewtio->c_cc[VMIN] = 0;``  
+
+####当我做完基于modbus协议的串口通信时，发现，很多你想知道的就在man中，不要遇到不懂的就度娘谷歌，先自己想，再看man，英语不好就查字典，
+####虽然速度慢一点，但是收获的也会更多！
+   
