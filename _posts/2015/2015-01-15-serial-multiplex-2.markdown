@@ -18,7 +18,7 @@ tags: linux
   正确的gpio寄存器才是第一步,我选择了ARM11的GPM2,GPM4.  
 
   2.选定gpio后,查看三星6410的芯片手册,看gpio寄存器的配置,需要配置GPMCON,GPMDAT,GPMPUD这三个寄存器  
->         addr   	reset_value  
+>         addr       reset_value  
 >  GPMCON 0x7F008820 0x00222222  
 >  GPMDAT 0x7F008820 undefined  
 >  GPMPUD 0x7F008820 0x000002AA  
@@ -49,8 +49,8 @@ tags: linux
 
   ``tmp &= ~(0x3<<(2*2)|0x3<<(4*2));``  
   ``tmp |= (0x1<<(2*2)|0x1<<(4*2));``  
-  ``         ^    ^ ^               ``  
-  ``         1    2 3  ``  
+  ``---------^----^-^--------------``  
+  ``---------1----2-3--``  
   注:1表示要修改成的值  
      2表示第几个寄存器  
 	 3表示该寄存器有几bit去控制  
