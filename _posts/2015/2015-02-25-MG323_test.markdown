@@ -1,0 +1,151 @@
+---
+layout: post
+title: 编写代码测试MG323功能
+discription: 
+tags: linux
+---
+
+年前需要对华为的MG323这款芯片进行测试，主要是测试这款芯片的gprs数据通信
+那就从AT指令开始吧！　　
+
+ MG323的AT指令
+=====
+#####1.查看网络质量  
+> send:AT+CSQ\n  
+> recv:+CSQ:20,99\n  
+>      \n  
+>      OK  
+#####2.查询网络注册情况  
+> send:AT+CREG?\n  
+> recv:+CREG:0,1\n  注：已经注册本地网络，不主动上报
+>            \n  
+>            OK  
+#####3.设置连接协议(在MG323中conType在GPRS0下支持的参数名只有"conType"与"apn"是必选参数)  
+> send:at^sics=1,conType,GPRS0   注：设置ID为1的profile的conType选用GPRS0作为GPRS连接方式,ID范围是0~5  
+>            \n  
+>            OK  
+> send:at^sics=1,apn,cmnet       注：设置ID为1的profile的apn表示后参数表接入点名称  
+>            \n  
+>            OK  
+#####4.设置tcp套接字   
+> send: at^siss=1,srvType,socket\n　　注：设置ID为1的profile的srvType服务类型设置为socket模式  
+>                  \n  
+>                  OK  
+> send: at^siss=1,conId,0\n           注：设置ID为1的profile的srvType服务类型设置为socket模式  
+>                  \n  
+>                  OK  
+> send:at^siss=1,address,"socktcp://ip:port"\n  
+>                  \n  
+>                  OK  
+#####5.打开连接  
+> send:at^siso=1\n  
+> recv:\n  
+>      OK  
+注：若返回^SISW:1,1表示连接成功打开，但如果提示“Remote host has rejected the connection”
+则可能是服务器没开或无响应
+#####6.写入数据
+> send:at^siss=1,20\n
+> recv:^SISW:0, 20, 20\n
+> send:数据
+#####7.读出数据
+> send:at^sisr=1,25\n   注：25表示准备读取数据的长度为25
+> recv:^SISR:1,25\n     注：25表示缓存区中数据的长度为25
+>      数据\n
+>      OK\n
+
+　编写测试程序
+====
+> 解析数据
+> void getSisrData(char \*recall,int len){
+>     char tmp[300];
+>     char *result_tmp[10];
+>     int count = 0;
+>     int i;
+>     char a[10] = {0};
+>     char dataLen[10] = {0};
+>
+>     memset(tmp,0,sizeof(tmp));
+>     memcpy(tmp,recall,len);
+>     result_tmp[count] = strtok(tmp,"\r\n");    
+>     while(result_tmp[count]!=NULL){
+>         count++;
+>         result_tmp[count] = strtok(NULL,"\r\n");
+>     };
+>     for(i=0;i<=count;i++){
+>         printf("result_tmp[%d] = %s\r\n",i,result_tmp[i]);
+>         if(strstr(result_tmp[i],"^SISR")){
+>             sscanf(result_tmp[i],"^SISR: %1s,%s",a,dataLen);
+>             printf("----%s----%s\r\n",a,dataLen);
+>             memset(gprs_data,0,sizeof(gprs_data));
+>             if(dataLen>0)
+>                 memcpy(gprs_data,result_tmp[i+1],atoi(dataLen));
+>             break;
+>         }
+>     }
+> }
+> 获取接收数据
+> char \*command 接受数据命令
+> char \*flagBuf 
+> int delayTime 延时
+> int length 数据长度
+> int check_recv_info(char \*command,char \*flagBuf,int delayTime,int length)
+> {
+>     char tmp[length];
+>     memset(tmp,0,sizeof(tmp));
+>     char *recall = tmp;
+>     float begin,end;
+>     Timer t;
+>     t.start();
+>     begin = t.read();
+>     int i = 0;
+>     while(1) {
+>         end = t.read();
+>         if((end - begin)>delayTime) {
+>             if(i==0)
+>                 goto timeout;
+>             else
+>                 break;
+>         }
+>         if(pc.readable()) {
+>             tmp[i] = pc.getc();
+>             i++;
+>         }
+>     }
+>     if(strstr(recall,flagBuf)) {
+>         printf("Success==%s==%s==%d==time==%f\r\n",command,recall,i,end-begin);
+>     }
+>     if(strstr(recall,"^SISR:")){
+>         getSisrData(recall,i);
+>     }
+>     return 0;
+> timeout:
+>     return -1;
+> }
+> 
+> main(){
+>     pc.baud(115200); //设置串口波特率
+>     wait(0.5);        
+>     init_gprs();     //上述AT指令的1~5步作为初始化配置
+>     while(1) {
+>         clearSerial();    //清空串口缓存区
+>         memset(send_cmd,0,sizeof(send_cmd));
+>         sprintf(send_cmd,"at^sisw=1,%d\r\n",strlen(cmd_buf));　//配置AT写指令
+>         pc.printf(send_cmd);  //写入AT写指令
+>         if(check_recv_info("at^sisw=1","SISW",2,100) == 0) {  //检测写指令返回数据是否成功
+>             pc.printf(cmd_buf);   //向缓存区写数据
+>             send_num++;
+>             printf("send_num = %d\n",send_num);
+>             wait_ms(100*5);
+>         } else {
+>             continue;
+>         }
+>         clearSerial();
+>     
+>         pc.printf(recv_cmd);
+>         if(check_recv_info(recv_cmd,"^SISR: 1,300",2,300) == 0) { //检测写指令返回数据是否成功
+>             printf("gprs_data:%s\r\n",gprs_data);
+>         }
+>         wait_ms(100*5);
+>     }
+> }
+> 
