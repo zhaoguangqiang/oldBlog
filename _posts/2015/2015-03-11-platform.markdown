@@ -1,0 +1,137 @@
+---
+layout: post
+title: platform杂记
+discription: 
+tags: linux
+---
+
+ 一、分离思想：platform实现资源与驱动分离，在移植时，只需修改资源部分，大大增强可移植性
+====
+    将资源与驱动都注册进入总线，用platform进行管理  
+    描述平台硬件信息，一般在厂家板级支持包 arch/arm/mach-s5pv210/mach-smdkv210.c  
+ 二、platform_device资源
+====
+> ``struct platform_device ->struct resource *resource,资源存放（地址信息），通过地址访问硬件设备，使用时需将物理地址映射为虚拟地址， ``  
+> `` ``  
+> ``key_platform ``  
+> ``    key_device.c 资源注册到platform中，可以编译成模块随时加载或卸载，或添加到板级支持包 ``  
+> `` ``  
+> ``2.找到	void (*release)(struct device *dev){ ``  
+> `` ``  
+> ``	} ``  
+> ``并作出修改 ``  
+> ``	void key_release(struct device *dev){ ``  
+> `` ``  
+> ``	} ``  
+> ``3.列出resource结构体 ``  
+> ``	struct resource key_resource[] = {//可不指定大小 ``  
+> ``	    [0]={	//表元素0	gph2 ``  
+> ``			.start = 0xe020c40,//首地址 ``  
+> ``			.end =0xe020c4c, ``  
+> ``			.flags =IORESOURCE_MEM, //现在同时有io口与中断号，但此时只能存在一个，所以需要多个resource，可定义resource数组 ``  
+> ``	    }, ``  
+> ``	    [1]={	//gph3 ``  
+> ``			.start =0xe0200c60 , ``  
+> ``			.end =0xe0200c6c, ``  
+> ``			.flags =IORESOURCE_MEM, ``  
+> ``	    }， ``  
+> ``	    [2]={	//irq ``  
+> ``			.start = IRQ_EINT(20),//一般一个resource使用一个中断号，开始和结束一样即可，不写结束中断号也可 ``  
+> ``			.end =IRQ_EINT(20), ``  
+> ``			.flags =IORESOURCE_IRQ, ``  
+> ``	    }， ``  
+> ``	} ``  
+> `` ``  
+> ``1.列出结构体struct platform_device key_device = { ``  
+> ``	    .name = "key15", ``  
+> ``	    .id   = 0, ``  
+> ``	    .dev ={		 ``  
+> ``	    	.release =key_release ,	//2.不知道release原型的时候，去结构体定义找其成员  ``  
+> ``            } ``  
+> ``	    .num_resource = ARRAY_SIZE(key_resource),//num该处有个宏定义，通过查找即可，数字也可以，有三个resource ``  
+> ``	    .resource =key_resource, ``  
+> ``	 ``  
+> ``4、还需注册进入platform，写成模块进行注册 ``  
+> ``int key_device_init(void){ ``  
+> ``	return platform_device_register(&key_device);//注册,把该函数返回值当做返回值 ``  
+> ``	//return 0; ``  
+> ``} ``  
+> ``void key_device_exit(void){ ``  
+> ``	platform_device_unregister(&key_device); ``  
+> ``} ``  
+> `` ``  
+> ``module_init(key_device_init); ``  
+> ``module_exit(key_device_exit); ``  
+> `` ``  
+> ``MODULE_LICENSE("GPL"); ``  
+> ``MODULE_AUTHOR("zhgq"); ``  
+
+    mach-smdkv210.c  
+    struct platform_device *smdkv210_devices[]{//结构体指针数组，指向结构体的指针数组  
+    	&s5pv210_device_iis0,//每个都是一个资源  
+    	&key_device,//可以将我们所写的资源写入该结构体，在启动内核时调用该资源  
+    }  
+    但真正存放资源的是mach-smdkc110.c  
+    可以直接在struct platform_device *smdkv110_devices该结构体下的宏开关中修改  
+    在.init_machine = smdkc110_machine_init进行硬件初始化,不同板级进行不同初始化  
+    在smdkc110_machine_init函数中调用platform_add_devices进行多个注册  
+    why在110的资源中  
+
+ 二、platform_driver 驱动	
+====
+    在driver与device匹配后调用probe函数  
+    通过probe进行硬件初始化  
+    每有一方注册时，会去另一方去查找，直到相匹配  
+
+> ``static struct source *gph2_res;//col_base ``  
+> ``static struct source *gph3_res;//row_base ``  
+> ``void *gph2_base;//起始地址 ``  
+> ``void *gph3_base; ``  
+> ``unsigned int irqnum;//定义中断号变量 ``  
+> `` ``  
+> ``6、使用我们映射好的虚拟地址去访问gph2_base ``  
+> ``#define	GPH2CON (unsigned long)(gph2_base+0x00) ``  
+> ``#define	GPH2DAT (unsigned long)(gph2_base+0x04) ``  
+> ``#define	GPH2UP (unsigned long)(gph2_base+0x08) ``  
+> ``#define	GPH2DRV (unsigned long)(gph2_base+0x0C) ``  
+> `` ``  
+> ``2、拷贝int (*probe)(struct platform_device *device) ``  
+> ``3、修改int key15_probe (struct platform_device *device){ ``  
+> ``	//原模块初始化函数内容放入probe中 ``  
+> ``5、	//若匹配成功去获得资源 ``  
+> ``	gph2_res = platform_get_resource(device,IORESOURCE_MEM,0);//第一个参数key_device地址，靠总线传递过来的，是device,第二个参数是哪个io口或irq,第三个参数num是同类资源的序号 ``  
+> ``	gph3_res = platform_get_resource(device,IORESOURCE_MEM,1); ``  
+> ``	//物理地址仍需要映射 ``  
+> ``	gph2_base = ioremap(gph2_res->start,16);4个寄存器16个字节 ``  
+> ``	gph3_base = ioremap(gph3_res->start,16);4个寄存器16个字节 ``  
+> ``	 ``  
+> ``	io_port_init(); ``  
+> ``	//platform_get_irq函数是通过调用 platform_get_resource，返回resource->start即irq中断号地址 ``  
+> ``	irqnum = platform_get_irq(device,0);//第一个参数是*device指向的资源，第0个irq资源 ``  
+> ``	request_irq(irqnum); ``  
+> ``} ``  
+> ``int key15_remove(struct platform_device *device){ ``  
+> ``	//原模块卸载函数内容放入remove中 ``  
+> ``	free_irq(irqnum); ``  
+> ``} ``  
+> ``1、struct platform_driver key_driver= { ``  
+> ``	.probe = key15_probe, ``  
+> ``	.remove = key15_remove, ``  
+> ``	.driver = { ``  
+> ``		.name = "xxxx", ``  
+> ``		.owner = THIS_MODULE, ``  
+> ``	} ``  
+> ``}; ``  
+> ``4、注册模块初始化函数，里面加入总线驱动注册 ``  
+> ``static int __init key15_module_init(void){ ``  
+> ``	return platform_driver_register(&key_driver); ``  
+> ``} ``  
+> ``static void __exit key15_module_exit(void){ ``  
+> ``	platform_driver_unregister(&key_driver); ``  
+> ``	return; ``  
+> ``} ``  
+> ``5、从device中取得资源信息 ``  
+> ``	通过函数获得 ``  
+> `` ``  
+
+

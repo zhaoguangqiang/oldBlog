@@ -84,7 +84,7 @@ spi特点：串行;全双工：两根数据线;同步：1根时钟线;主从方�
 				&=~(1<<0)对第0位清零，并且保持其他位不变  
 	  
   
-		初始化：  
+> ``		初始化：  ``
 > ``		#define MOSI	S5PV210_GPB(7)``  
 > ``		#define CS		S5PV210_GPB(5)``  
 > ``		#define SCK		S5PV210_GPB(4)``  
@@ -106,7 +106,6 @@ spi特点：串行;全双工：两根数据线;同步：1根时钟线;主从方�
 > ``			unsigned char bct3288a_buffer[2];``  
 > ``			unsigned long len = min(count,sizeof(bct3288a_buffer));``  
 > ``			int retval ;``  
-> ````  
 > ``			copy_from_user();``  
 > ``			spi_send_byte(bct3288a_buffer[0],bct3288a_buffer[1]);``  
 > ``			return len;``  
