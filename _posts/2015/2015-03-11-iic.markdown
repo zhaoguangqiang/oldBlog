@@ -1,0 +1,395 @@
+---
+layout: post
+title: i2c总线学习
+discription: 
+tags: linux
+---
+ i2c
+====
+i2c通信：两线式，半双工（数据线），同步串行总线（时钟线），多主机总线，同一时刻只允许一个主机，只允许一个控制时钟线,没有了片选，只能使用软件方法  
+	bma150:重力加速度传感器x/y/z  
+	  
+	起始信号：scl为高电平，sda由高跳低  
+		SDA--\__  
+		SCL----\__  
+	应答信号：接收器收到每个字节数据后第9个时钟周期，可以回复应答信号，若不正确则发非应答信号  
+		前八个时钟周期clk控制权掌握在主设备，第九个也在主设备手中  
+		主设备不一定是sda的控制者，sda的控制权是在发送者手中，input与output不断切换，第九个时钟周期sda掌握在接收器手中  
+		SCL:主设备  
+		SDA:1-8发送者  
+			9接受者  
+	终止信号：  
+		SDA__/--  
+		SCL----  
+	先发送地址，再发送数据  
+	低电平准备数据，高电平读取数据  
+	谁接收数据，谁发送应答信号  
+		  
+		  
+	写数据：  
+		起始信号--->写芯片地址---->写寄存器---->写数据----->终止信号  
+	读数据：  
+		起始信号--->写芯片地址---->写寄存器地址---->终止信号  
+		起始信号--->写芯片地址---->读数据---->终止信号  
+	工作原理：  
+	硬件连接：  
+	初始化：  
+	实现f_ops：  
+	  
+	datasheet：  
+		1、原理（从设备地址 时序）  
+		2、IO  
+		3、寄存器（地址 数据）  
+		  
+	逻辑移位：  
+	算术移位：保持符号位不变  
+	<<都是逻辑左移  
+	>>无符号的都是逻辑右移  
+	>>有符号的才是算数右移  
+	(short)(x<<6)>>6//先左移六位，再强制转换成short（由于short位16位，而移位寄存器为32位，所以必须提前告诉编译器这是short），再算数右移6位  
+	建议：(x<<22)>>22  
+	  
+ i2c模拟时序  
+====  
+	  
+> ``	include <linux/fs.h>``  
+> ``	include <linux/kernel.h>``  
+> ``	include <linux/init.h>``  
+> ``	include <linux/device.h>``  
+> ``	include <linux/module.h>``  
+> ``	``  
+> ``	#define MODULE_DRIVER_NAME "bma150_module_driver"	//cat /proc/device``  
+> ``	#define MODULE_CLASS_NAME "bma150_module_class"	``  
+> ``	#define MODULE_DEVICE_NAME "bma150_module_device"	//ls /dev/``  
+> ``	#define SDA S5PV210_GPD1(4)``  
+> ``	#define SCL S5PV210_GPD1(5)``  
+> ``	#define SET_BIT(pin) gpio_set_value(pin,1);``  
+> ``	#define CLR_BIT(pin) gpio_set_value(pin,0);``  
+> ``	``  
+> ``	static int major = 0;//主设备号``  
+> ``	static int minor = 0;//从设备号``  
+> ``	static struct class *my_class;``  
+> ``	``  
+> ``	static struct xyz_info{``  
+> ``		short x;``  
+> ``		short y;``  
+> ``		short z;``  
+> ``	};``  
+> ``	``  
+> ``	void i2c_start(void){``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_OUTPUT);``  
+> ``		``  
+> ``		SET_BIT(SDA);``  
+> ``		udelay(10);``  
+> ``		SET_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		``  
+> ``		CLR_BIT(SDA);``  
+> ``		udelay(10);``  
+> ``		``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``	}``  
+> ``	void i2c_stop(void){``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_OUTPUT);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``	}``  
+> ``	void i2c_send_byte(unsigned char data){``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_OUTPUT);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		for(i=0;i<8;i++){``  
+> ``			if(data&0x80)``  
+> ``				SET_BIT(SDA);``  
+> ``			else``  
+> ``				CLR_BIT(SDA);``  
+> ``			udelay(10);``  
+> ``		}``  
+> ``		SET_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		``  
+> ``		data = data<<1;``  
+> ``	}``  
+> ``	unsigned char i2c_recv_byte(void){``  
+> ``		unsigned char data;``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_INPUT);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_INPUT);``  
+> ``		udelay(10);``  
+> ``		``  
+> ``		SET_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		data = gpio_get_value(SDA);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		return data;``  
+> ``	}``  
+> ``	void i2c_recv_ack(void){``  
+> ``		int ack;``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_INPUT);``  
+> ``		udelay(10);//让对方准备数据``  
+> ``		``  
+> ``		SET_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		ack = gpio_get_value(SDA);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``	}``  
+> ``	void i2c_send_ack(void){``  
+> ``		int ack;``  
+> ``		s3c_gpio_cfgpin(SDA,S3C_GPIO_OUTPUT);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		SET_BIT(SDA);``  
+> ``		udelay(10);``  
+> ``		SET_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``		CLR_BIT(SCL);``  
+> ``		udelay(10);``  
+> ``	}``  
+> ``	``  
+> ``	void bma150_read_bytes(unsigned char *data){``  
+> ``		/*1、写寄存器地址*/``  
+> ``		i2c_start();``  
+> ``		i2c_send_byte();``  
+> ``		i2c_recv_ack();//先看ack的值，保证都为0才是正确接受数据``  
+> ``		i2c_send_byte();``  
+> ``		i2c_recv_ack();``  
+> ``		i2c_stop();``  
+> ``		/*2、读寄存器6个字节数据*/``  
+> ``		i2c_start();``  
+> ``		i2c_send_byte();``  
+> ``		i2c_recv_ack();``  
+> ``		for(i=0; i<5; i++){``  
+> ``			data[i] = i2c_recv_byte();``  
+> ``			i2c_send_ack();``  
+> ``		}``  
+> ``		data[5] = i2c_recv_byte();``  
+> ``		i2c_send_nack();``  
+> ``	}``  
+> ``	void bma_write_ack(){``  
+> ``		i2c_start();``  
+> ``		i2c_send_byte();``  
+> ``		i2c_recv_ack();``  
+> ``		for(i=0;i<3;i++){``  
+> ``			i2c_send_byte();``  
+> ``			i2c_recv_ack();``  
+> ``		}``  
+> ``		i2c_send_byte();``  
+> ``		i2c_recv_ack();``  
+> ``		i2c_send_nack();``  
+> ``	}``  
+> ``	``  
+> ``	void deal_data(unsigned char *data){``  
+> ``		short x,y,z;``  
+> ``		x = ((data[1])>>6)|(data[2]<<2);``  
+> ``		y = ((data[3])>>6)|(data[4]<<2);``  
+> ``		z = ((data[5])>>6)|(data[6]<<2);``  
+> ``		xyz_info->x = (short)(x<<6)>>6;``  
+> ``		xyz_info->y = (short)(y<<6)>>6;``  
+> ``		xyz_info->z = (short)(z<<6)>>6;``  
+> ``	}``  
+> ``	``  
+> ``	static int module_read(struct file *file,char __user *buffer ,size_t count ,loff_t *offset){//__user表明从应用层传来的数据``  
+> ``		printk("%s %d\n",__FUNCTION__,__LINE__);		``  
+> ``		int retval;``  
+> ``		unsigned char bma150_data[6] = {0};``  
+> ``		bma150_read_bytes(bma150_data);``  
+> ``		deal_data(bma_data);``  
+> ``		``  
+> ``		if(copy_to_user(buffer,xyz_info,sizeof(xyz_info))!=0);{``  
+> ``			retval = -EFAULT;``  
+> ``			go cp_err;``  
+> ``		}``  
+> ``		return len;``  
+> ``		cp_err:``  
+> ``			return retval;``  
+> ``	}``  
+> ``	void io_port_init(void){``  
+> ``		//主设备控制scl，设置为输出端``  
+> ``		s3c_gpio_cfgpin(SCL,S3C_GPIO_OUTPUT);``  
+> ``	}``  
+> ``	``  
+> ``	static struct file_operations module_fops = {``  
+> ``		.owner = THIS_MODULE,//.表示引用该结构体内部成员``  
+> ``		.read = module_read,``  
+> ``	}	``  
+> ``	``  
+> ``	//模块加载函数，在内核启动时加载``  
+> ``	static int __init bma150_module_init(void){``  
+> ``		printk("%s %d\n",__FUNCTION__,__LINE__);``  
+> ``		io_port_init();``  
+> ``		major = register_chrdev(0,MODULE_DRIVER_NAME,&module_fops); //第一个参数让内核自动分配``  
+> ``		//创建设备类``  
+> ``		my_class = class_create(THIS_MODULE,MODULE_CLASS_NAME);``  
+> ``		//创建设备文件``  
+> ``		device_create(my_class,NULL,MKDEV(major,minor),NULL,bma150_module_device);//dev_t高12位放主设备号，低20位放从设备号，MKDEV这个宏可实现该功能``  
+> ``		return 0;``  
+> ``	}``  
+> ``	static void __exit bma150_module_exit(void){``  
+> ``		unregister_chrdev(major,MODULE_DRIVER_NAME);``  
+> ``		device_destroy(my_class,MKDEV(major,minor));``  
+> ``		class_destroy(my_class);``  
+> ``	}``  
+> ``	//声明模块加载函数的宏，及模块加载函数的入口地址``  
+> ``	module_init(bma150_module_init);``  
+> ``	module_exit(bma150_module_exit);``  
+> ``	MODULE_LINCENCE("GPL");``  
+> ``	MODULE_AUTHOR("ZHGQ");	``  
+	  
+    i2c子系统:在模拟I/O口或i2c控制器基础上进行封装，操作简单，可移植性好  
+	函数接口与控制器驱动相联系--->控制器驱动与硬件相联系  
+	i2c_client：描述i2c设备  
+		1.name  
+		2.从设备地址  
+		3.硬件连接：告诉设备你使用哪个adapter  
+	i2c_adapter：由i2c控制器实现，可以理解为一个adapter对应一个控制器  
+		作用：i2c_client中存储了一些硬件信息（如中断号，i/o口），------>i2c_driver:从i2c_client中拿到从设备地址，硬件连接---但是模拟时序，配置寄存器麻烦  
+		--->内核帮你完成这个操作（将platform_driver与platform_device中的信息填好），封装在i2c_adapter---->i2c_driver进行调用i2c_adapter实现那些复杂的操作  
+		只需将i2c_driver与i2c_client加载到总线，让其自动匹配即可  
+  
+> ``    /*实现i2c注册进内核*/``  
+> ``	struct i2c_client *bma150_client;``  
+> ``	struct i2c_board_info bma150_info = {``  
+> ``		I2C_BOARD_INFO("BMA150",0x38);``  
+> ``	};``  
+> ``	int __init bma150_device_init(void){``  
+> ``		struct i2c_adapter *bma150_adap;``  
+> ``		``  
+> ``		bma150_adap = i2c_get_adapter(2);``  
+> ``		bma150_client = i2c_new_device(bma150_adap,&bma150_info);//第二个参数是i2c_board_info结构体，其中包括name与addr``  
+> ``		i2c_put_adapter(bma150_adap);//可以使得他能正常卸载``  
+> ``		return 0;``  
+> ``	}``  
+> ``	void __exit bma150_device_exit(void){``  
+> ``		i2c_unregister_device(bma150_client);``  
+> ``		return ;``  
+> ``	}``  
+> ``	``  
+> ``		``  
+> ``	子系统方法实现bma150``  
+> ``		``  
+> ``	include <linux/fs.h>``  
+> ``	include <linux/kernel.h>``  
+> ``	include <linux/init.h>``  
+> ``	include <linux/device.h>``  
+> ``	include <linux/module.h>``  
+> ``	``  
+> ``	#define MODULE_DRIVER_NAME "bma150_module_driver"	//cat /proc/device``  
+> ``	#define MODULE_CLASS_NAME "bma150_module_class"	``  
+> ``	#define MODULE_DEVICE_NAME "bma150_module_device"	//ls /dev/``  
+> ``	#define SDA S5PV210_GPD1(4)``  
+> ``	#define SCL S5PV210_GPD1(5)``  
+> ``	#define SET_BIT(pin) gpio_set_value(pin,1);``  
+> ``	#define CLR_BIT(pin) gpio_set_value(pin,0);``  
+> ``	``  
+> ``	static int major = 0;//主设备号``  
+> ``	static int minor = 0;//从设备号``  
+> ``	static struct class *my_class;``  
+> ``	struct i2c_client *bma150_cli;``  
+> ``	//1、删除时序相关内容``  
+> ``	static struct xyz_info{``  
+> ``		short x;``  
+> ``		short y;``  
+> ``		short z;``  
+> ``	};``  
+> ``	``  
+> ``	void deal_data(unsigned char *data){``  
+> ``		short x,y,z;``  
+> ``		x = ((data[1])>>6)|(data[2]<<2);``  
+> ``		y = ((data[3])>>6)|(data[4]<<2);``  
+> ``		z = ((data[5])>>6)|(data[6]<<2);``  
+> ``		xyz_info->x = (short)(x<<6)>>6;``  
+> ``		xyz_info->y = (short)(y<<6)>>6;``  
+> ``		xyz_info->z = (short)(z<<6)>>6;``  
+> ``	}``  
+> ``	void bma150_read_bytes(unsigned char *data){``  
+> ``		struct i2c_msg bma150_msg[2];``  
+> ``		unsigned char reg_addr = 0x02;``  
+> ``		bma150_msg[0].addr = bma150_cli->addr;``  
+> ``		bma150_msg[0].flags = !I2C_M_RD;``  
+> ``		bma150_msg[0].count = 1;``  
+> ``		bma150_msg[0].buf = &reg_addr;``  
+> ``		``  
+> ``		bma150_msg[1].addr = bma150_cli->addr;``  
+> ``		bma150_msg[1].flags = I2C_M_RD;``  
+> ``		bma150_msg[1].count = 6;``  
+> ``		bma150_msg[1].buf = data;``  
+> ``		//发送信息给adapter``  
+> ``		i2c_transfer(bma150_cli->adapter,bma150_msg,2);``  
+> ``		//方法二：不需要填写结构体``  
+> ``		//发送函数int i2c_master_send(struct i2c_client *client, &reg_addr,1);``  
+> ``		//读取函数i2c_master_recv(struct i2c_client *client,data,6);``  
+> ``		//方法三：i2c_smbusa_read_i2c_block_data(struct i2c_client *client,0x02,6,data);``  
+> ``	}``  
+> ``	``  
+> ``	static int module_read(struct file *file,char __user *buffer ,size_t count ,loff_t *offset){//__user表明从应用层传来的数据``  
+> ``		printk("%s %d\n",__FUNCTION__,__LINE__);		``  
+> ``		int retval;``  
+> ``		unsigned char bma150_data[6] = {0};``  
+> ``		bma150_read_bytes(bma150_data);``  
+> ``		deal_data(bma_data);``  
+> ``		``  
+> ``		if(copy_to_user(buffer,xyz_info,sizeof(xyz_info))!=0);{``  
+> ``			retval = -EFAULT;``  
+> ``			go cp_err;``  
+> ``		}``  
+> ``		return len;``  
+> ``		cp_err:``  
+> ``			return retval;``  
+> ``	}``  
+> ``	``  
+> ``	static struct file_operations module_fops = {``  
+> ``		.owner = THIS_MODULE,//.表示引用该结构体内部成员``  
+> ``		.read = module_read,``  
+> ``	}	``  
+> ``	//3、将模块初始化函数内容移至匹配函数底下，卸载函数内容放到remove函数中``  
+> ``	int bma150_probe(struct i2c_client *client,const struct i2c_device_id *id){``  
+> ``		printk("%s %d\n",__FUNCTION__,__LINE__);``  
+> ``		io_port_init();``  
+> ``		bma150_cli = client;``  
+> ``		major = register_chrdev(0,MODULE_DRIVER_NAME,&module_fops); //第一个参数让内核自动分配``  
+> ``		//创建设备类``  
+> ``		my_class = class_create(THIS_MODULE,MODULE_CLASS_NAME);``  
+> ``		//创建设备文件``  
+> ``		device_create(my_class,NULL,MKDEV(major,minor),NULL,bma150_module_device);//dev_t高12位放主设备号，低20位放从设备号，MKDEV这个宏可实现该功能``  
+> ``		return 0;	``  
+> ``	}``  
+> ``	int bma150_remove(struct i2c_client *client){``  
+> ``		unregister_chrdev(major,MODULE_DRIVER_NAME);``  
+> ``		device_destroy(my_class,MKDEV(major,minor));``  
+> ``		class_destroy(my_class);``  
+> ``	}``  
+> ``	static const struct i2c_device_id bma150_id_table = {``  
+> ``		{"xxx",0},//xxx需要与刚才的i2c_client内的名字一样，识别多个设备会用到编号``  
+> ``	}；``  
+> ``	//2、编写i2c_driver结构体``  
+> ``	struct i2c_driver bma150_driver = {``  
+> ``		.probe = bma150_probe,``  
+> ``		.remove = bma150_remove,``  
+> ``		//5、填充id_table,搜索i2c_add_driver去找id_table，快速找到id_table的用法``  
+> ``		.id_table = ,//通过id_table实现匹配``  
+> ``		.driver ={``  
+> ``			.owner = THIS_MODULE,``  
+> ``			.name = "suibianxie",``  
+> ``		}``  
+> ``	}``  
+> ``	//4、模块加载函数，在内核启动时加载驱动，注册该驱动``  
+> ``	static int __init bma150_module_init(void){``  
+> ``		return i2c_add_driver(&bma150_driver);``  
+> ``	}``  
+> ``	static void __exit bma150_module_exit(void){``  
+> ``		i2c_del_driver(&bma150_driver);``  
+> ``	}``  
+> ``	//声明模块加载函数的宏，及模块加载函数的入口地址``  
+> ``	module_init(bma150_module_init);``  
+> ``	module_exit(bma150_module_exit);``  
+> ``	MODULE_LINCENCE("GPL");``  
+> ``	MODULE_AUTHOR("ZHGQ");	``  
+> ``    数据传输方法：填充i2c_msg-->通过i2c_transfer去发送，此函数返回值为成功发送msg的个数	``  

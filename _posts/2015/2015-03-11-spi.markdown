@@ -1,0 +1,151 @@
+---
+layout: post
+title: spi总线学习
+discription: 
+tags: linux
+---
+ spi
+====
+spi特点：串行;全双工：两根数据线;同步：1根时钟线;主从方式工作：所以设计了片选线  
+	clk下降沿准备，上升沿发送，先传输高位  
+	数据传输两个阶段：  
+		1、准备：  
+			writel(dat);//MOSI口  根据数据把线上电平拉高或拉低  
+		2、接收  
+			readl(dat);//MISO  
+		  
+	cycle	  | 1 | 2 | 3 | 4 | 5 | 6 |	7 | 8 |(有八个时钟周期)  
+	SPICLK	____|-|_|-|_|-|_|-|_|-|_|-|_|-|_|-|__     
+	MOSI	   MSB							LSB（告诉我们先发高位，再发低位）  
+	MISO	   MSB							LSB  
+	CS		——\________________________________/——  
+	初始化电平:spi时钟线拉低，cs片选线拉高  
+	正式收发前，拉低片选线  
+	第一个时钟周期要发送的数据，在片选线拉低时已经准备（因没有spiclk下降沿）  
+	下降沿准备数据，上升沿读取数据  
+  
+> ``#define CLR_BIT(pin) gpio_set_value(pin, 0)``    
+> ``#define SET_BIT(pin) gpio_set_value(pin, 1)``    
+> ``#define CS gpxx``    
+> ``#define MOSI gpxx``    
+> ``#define MISO gpXX``    
+> ````    
+> ``void spi_send_byte(unsigned char data){``    
+> ``	int i;``    
+> ``	``    
+> ``	CLR_BIT(CS);``    
+> ``	udelay(10);//时间过短可能电平不稳定，无法读取正确的数值，时间较长，虽然读取数据变慢，但能保证正确性``    
+> ``	CLR_BIT(SCK);``    
+> ``	``    
+> ``	for(i=0;i <8;i++){``    
+> ``		if(data&0x80)``    
+> ``			SET_BIT(MOSI);//准备高电平``    
+> ``		else``    
+> ``			CLR_BIT(MOSI);//准备低电平``    
+> ``		udelay(10);``    
+> ``		``    
+> ``		SET_BIT(SCK);//上升沿来临，对方读数据``    
+> ``		udelay(10);``    
+> ``		``    
+> ``		CLR_BIT(SCK);``    
+> ``		udelay(10);``    
+> ``		data = data<<1;``    
+> ``	}``    
+> ``	SET_BIT(CS);``    
+> ``}``    
+> ````    
+> ``unsigned char spi_recv_byte(void){``    
+> ``	``    
+> ``}``    
+> ``注：MSB最高有效位Most Signifiant bit``    
+> ``	LSB最低有效位Least Significant bit``    
+	  
+	时钟极性：CPOL Clock Polarity,用来描述高低电平  
+	相位极性：CPHA Clock Phase，波形中的相对位置，描述第一个跳变沿，还是第二个跳变沿采集数据  
+	  
+	写一个驱动bct3288a：  
+		1、硬件工作原理：  
+		2、硬件连接  
+		3、初始化  
+		4、实现f_ops  
+		datasheet：描述硬件的资料  
+			1、原理：数据宽度是16bit（addr data）cpol cpha=0  
+				判断时钟极性，时钟相位  
+				时钟极性：初始为低电平  
+				时钟相位：为0  
+			2、IO口：sck，data，cs  
+			3、寄存器：发送命令与数据到设备寄存器，使设备工作,要知道寄存器地址，数据  
+		spi控制器：  
+			数据：  
+				移位寄存器：在控制器中有两个缓存，接受fifo，发送fifo。  
+					发送fifo-传送多少位，数据位宽8/16/32bit--->8/16/32bit移位寄存器（一位位的发送数据）-->呼吸灯--->移位寄存器----->接收fifo  
+			时钟：  
+				PCLK:66M--用不了这么高频率->可以分频   
+				&=~(1<<0)对第0位清零，并且保持其他位不变  
+	  
+  
+		初始化：  
+> ``		#define MOSI	S5PV210_GPB(7)``  
+> ``		#define CS		S5PV210_GPB(5)``  
+> ``		#define SCK		S5PV210_GPB(4)``  
+> ``		``  
+> ``		#define CLR_BIT(pin) gpio_set_value(SCK,0);``  
+> ``		#define SET_BIT(pin) gpio_set_value(SCK,1);``  
+> ``		``  
+> ``		void io_port_init(unsigned char addr,unsigned char data){``  
+> ``			/*MOSI CS CLK都设置输出*/``  
+> ``			s3c_gpio_cfgpin(MOSI,S3C_GPIO_OUTPUT);``  
+> ``			s3c_gpio_cfgpin(SCK,S3C_GPIO_OUTPUT);``  
+> ``			s3c_gpio_cfgpin(CS,S3C_GPIO_OUTPUT);``  
+> ``			/*根据手册设置初始电平*/``  
+> ``			CLR_BIT(SCK);``  
+> ``			SET_BIT(CS);``  
+> ``		}``  
+> ``		``  
+> ``		static ssize_t bct3288a_write(){``  
+> ``			unsigned char bct3288a_buffer[2];``  
+> ``			unsigned long len = min(count,sizeof(bct3288a_buffer));``  
+> ``			int retval ;``  
+> ````  
+> ``			copy_from_user();``  
+> ``			spi_send_byte(bct3288a_buffer[0],bct3288a_buffer[1]);``  
+> ``			return len;``  
+> ``		}``  
+> ``		void spi_send_byte(unsigned char data,unsigned char addr){``  
+> ``			int i;``  
+> ``			``  
+> ``			CLR_BIT(CS);``  
+> ``			udelay(10);//时间过短可能电平不稳定，无法读取正确的数值，时间较长，虽然读取数据变慢，但能保证正确性``  
+> ``			CLR_BIT(SCK);``  
+> ``			``  
+> ``			for(i=0;i <8;i++){``  
+> ``				if(data&0x80)``  
+> ``					SET_BIT(MOSI);//准备高电平``  
+> ``				else``  
+> ``					CLR_BIT(MOSI);//准备低电平``  
+> ``				udelay(10);``  
+> ``				``  
+> ``				SET_BIT(SCK);//上升沿来临，对方读数据``  
+> ``				udelay(10);``  
+> ``				``  
+> ``				CLR_BIT(SCK);``  
+> ``				udelay(10);``  
+> ``				data = data<<1;``  
+> ``			}``  
+> ``			for(i=0;i <8;i++){``  
+> ``				if(addr&0x80)``  
+> ``					SET_BIT(MOSI);//准备高电平``  
+> ``				else``  
+> ``					CLR_BIT(MOSI);//准备低电平``  
+> ``				udelay(10);``  
+> ``				``  
+> ``				SET_BIT(SCK);//上升沿来临，对方读数据``  
+> ``				udelay(10);``  
+> ``				``  
+> ``				CLR_BIT(SCK);``  
+> ``				udelay(10);``  
+> ``				addr = addr<<1;``  
+> ``			}``  
+> ``			SET_BIT(CS);``  
+> ``		}		``  
+> ``	``  
