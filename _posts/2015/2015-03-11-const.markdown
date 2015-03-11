@@ -1,0 +1,35 @@
+---  
+layout: post  
+title: const的几种用法  
+discription:   
+tags: c  
+---  
+  
+const 类型名 变量＝常量值  
+  
+const表示只读类型，可以保证常量不会被意外修改。他是一个左结合的类型修饰符。  
+  
+####指向常量的指针变量  
+char name[20] = "Tony";  
+const char \*p_name = name;  
+name[3] = 'a';×，指针指向的常量不可被改变  
+name = "cinder";√，指针地址可以被改变  
+####指向常指针  
+char name[20] = "Tony";  
+char const \*p_name = name;  
+name[3] = 'a';√，指针指向的常量可被改变  
+name = "cinder";×，指针地址不可以被改变  
+####指向常量的常指针变量  
+charname[20] = "Tony";  
+const char const \*p_name = name;  
+name[3] = 'a';×，指针指向的常量不可被改变  
+name = "cinder";×，指针地址不可以被改变  
+  
+####example:  
+const int p; p表示常整形数，  
+const int * p; p表示指向常整型的指针，其所指向的常整型数不可修改  
+int * const p; p表示指向整型的常指针，该常指针不可被修改  
+const int \*const p; p表示指向常整型的常指针，该常指针与该常指针所指向的常整型数均不可改变  
+  
+  
+ 
