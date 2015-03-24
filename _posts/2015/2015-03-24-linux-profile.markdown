@@ -2,7 +2,7 @@
 layout: post
 title: profile bashrc间的启动顺序
 discription: 
-tags: 
+tags: linux
 ---
 
  交互式shell与非交互式shell
