@@ -23,20 +23,26 @@ tags: c
 > ``    total = num1+num2;``  
 > ``    return total;``  
 > ``}``  
-> `` ``  
+
 > ``int main(int argc, char *argv[])``  
 > ``{``  
 > ``    int a,b,c;``  
-> ``    int (*p)();``  
-> ````  
 > ``    a = 2;``  
 > ``    b = 3;``  
-> ``    p = add;``  
-> ``    c = (*p)(a,b);``  
-> ``    printf("c = %d\n",c);``  
+> ``#if 0``  
+> ``    int (*p)();``  
 > ````  
+> ``    p = &add;``  
+> ``    c = p(a,b);``  
+> ``#else``  
+> ``    typedef int (*funcp)();``  
+> ``    funcp pfun = add;``  
+> ``    c = pfun(a,b);``  
+> ``#endif``  
+> ``    printf("c = %d\n",c);``  
+> ``    ``  
 > ``    return 0;``  
-> ``}``
+> ``}``  
 
  指针函数
 ====
