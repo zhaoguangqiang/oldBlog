@@ -2,7 +2,7 @@
 layout: post
 title: 函数指针与指针函数
 discription: 
-tags: 
+tags: c
 ---
 
  函数指针
