@@ -11,6 +11,26 @@ tags: c
 
 多次多处使用声明时，如果要更改声明可以直接去头文件typedef定义中去修改，避免了许多麻烦．  
 
+相对于typedef来说，#define无法处理指针类型  
+
+如：  
+> ``#define ptr char *``  
+> ``ptr a,b``  
+a定义成char \*,而b的类型为char  
+
+> ``typedef char * ptr``  
+> ``ptr a,b``  
+a,b都被定义成char \*类型  
+
+typedef定义结构体：  
+> ``typedef struct {``  
+> ``}EXP;``  
+> ``EXP exp;``  
+
+> ``struct {``  
+> ``}EXP;``  
+> ``struct EXP exp;``  
+
 ####typedef使用：
 
 #####typedef声明函数指针类型  
