@@ -1,0 +1,38 @@
+---
+layout: post
+title: typedef的使用
+discription: 
+tags: c
+---
+
+使用typedef可以将数据类型定义出新的类型名称，typedef使用与普通声明相同．  
+
+通常使用typedef声明类型可以避免声明过长.  
+
+多次多处使用声明时，如果要更改声明可以直接去头文件typedef定义中去修改，避免了许多麻烦．  
+
+####typedef使用：
+
+#####typedef声明函数指针类型  
+
+> ``typedef int (\*funcPointer)(int ,int );``  
+
+#####函数定义  
+
+> ``int func(int a,int b){``  
+> ``    int c = a + b;``  
+> ``    return c;``  
+> ``}``  
+
+#####定义pfunc函数指针  
+
+> ``funcPointer pfunc``  
+
+#####pfunc函数指针指向函数首地址  
+
+> ``pfunc = func``  
+
+#####使用pfunc函数指针调用func首地址，使用func函数  
+
+> ``pfunc(a,b)``  
+
