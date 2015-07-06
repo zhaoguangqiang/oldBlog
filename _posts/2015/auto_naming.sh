@@ -12,6 +12,7 @@ fi
 if [ ! -f "$myfile" ];then
     touch "$myfile"
     cp model.markdown "$myfile"
+    vim "$myfile"
 else
     echo "$myfile have been exist"
     exit 0;

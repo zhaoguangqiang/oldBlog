@@ -35,7 +35,7 @@ typedef定义结构体：
 
 #####typedef声明函数指针类型  
 
-> ``typedef int (\*funcPointer)(int ,int );``  
+> ``typedef int (*funcPointer)(int ,int );``  
 
 #####函数定义  
 

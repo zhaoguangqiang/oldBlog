@@ -1,0 +1,26 @@
+---
+layout: post
+title: enum
+discription: 
+tags: c
+---
+
+枚举类型是一种基本数据类型,内部数据为常量    
+
+定义：enum 枚举名{ 枚举值表 };  
+
+enum枚举类型的声明与struct结构体的声明方法一致．  
+
+> ``enum weekday{sun,mou,tue,wed,thu,fri,sat};``  
+> ``weekday a,b,c;``  
+  
+> ``enum weekday{sun,mou,tue,wed,thu,fri,sat}a,b,c;``  
+  
+> ``enum {sun,mou,tue,wed,thu,fri,sat}a,b,c;``  
+
+> ``enum {sun,mou,tue,wed,thu,fri,sat}a;``  
+sun为0,mou为1,tue为2,wed为3,thu为4,fri为5,sat为6
+
+> ``enum {sun = 7,mou = 1,tue,wed,thu,fri,sat}a;``  
+sun为7,mou为1,tue为2,wed为3,thu为4,fri为5,sat为6
+
